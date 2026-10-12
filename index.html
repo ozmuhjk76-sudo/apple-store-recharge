@@ -399,7 +399,7 @@
         searchInvoice();
     }
 
-    // دالة شاملة لرفع الرسائل والصور لتليجرام لضمان عدم حدوث أخطاء
+    // دالة شاملة لرفع الرسائل والصور لتليجرام لضمان عدم حدوث أخطاء باستخدام sendPhoto
     async function sendToTelegramAPI(textMsg, filesArr) {
         // 1. إرسال النص
         let msgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -408,22 +408,25 @@
             body: JSON.stringify({ chat_id: CHAT_ID, text: textMsg, parse_mode: 'Markdown' })
         });
         let msgData = await msgRes.json();
-        if(!msgData.ok) throw new Error(msgData.description);
+        if(!msgData.ok) throw new Error("مشكلة في إرسال النص: " + msgData.description);
 
-        // 2. إرسال الملفات بالتوالي
+        // 2. إرسال الصور بالتوالي باستخدام sendPhoto الأسرع
         for(let item of filesArr) {
             if(item.file) {
                 let fd = new FormData();
                 fd.append('chat_id', CHAT_ID);
-                fd.append('document', item.file); // sendDocument يقبل أي نوع ملف بجودته الأصلية
+                fd.append('photo', item.file); // استخدام photo بدلاً من document
                 fd.append('caption', item.caption);
                 
-                let fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+                let fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
                     method: 'POST',
                     body: fd
                 });
                 let fileData = await fileRes.json();
-                if(!fileData.ok) throw new Error("فشل إرسال الملف: " + fileData.description);
+                if(!fileData.ok) {
+                    console.error("خطأ تليجرام في المرفق:", fileData);
+                    throw new Error("فشل إرسال الصورة: " + fileData.description);
+                }
             }
         }
     }
