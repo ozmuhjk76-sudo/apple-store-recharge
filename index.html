@@ -371,17 +371,13 @@
 </div>
 
 <script>
-    // إعدادات بوت التليجرام
     const BOT_TOKEN = '8999556963:AAG9v3lw-nGpplQYRA-6iJG4bOzdCpq5YIA';
-    
-    // تم التحديث إلى الآي دي الخاص بك
     const CHAT_ID = '5478867416'; 
 
     let commission = 0;
     let totalAmount = 0;
     let currentInvoiceCode = '';
 
-    // نظام التنقل بين التبويبات
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -394,16 +390,14 @@
         }
     }
 
-    // الانتقال السريع لقسم تأكيد الدفع مع وضع كود الفاتورة
     function goToCurrentOrderTab() {
         switchTab('tab-current-order');
         document.getElementById('searchInvCode').value = currentInvoiceCode;
         searchInvoice();
     }
 
-    // دالة شاملة لرفع الرسائل والصور لتليجرام لضمان عدم حدوث أخطاء باستخدام sendPhoto
+    // تم التعديل هنا: العودة لاستخدام sendDocument لضمان رفع الصور بأحجام كبيرة تصل لـ 50 ميجا
     async function sendToTelegramAPI(textMsg, filesArr) {
-        // 1. إرسال النص
         let msgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -412,30 +406,24 @@
         let msgData = await msgRes.json();
         if(!msgData.ok) throw new Error("مشكلة في إرسال النص: " + msgData.description);
 
-        // 2. إرسال الصور بالتوالي باستخدام sendPhoto الأسرع
         for(let item of filesArr) {
             if(item.file) {
                 let fd = new FormData();
                 fd.append('chat_id', CHAT_ID);
-                fd.append('photo', item.file);
+                fd.append('document', item.file); // التغيير هنا إلى document
                 fd.append('caption', item.caption);
                 
-                let fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                let fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, { // التغيير هنا إلى sendDocument
                     method: 'POST',
                     body: fd
                 });
                 let fileData = await fileRes.json();
                 if(!fileData.ok) {
-                    console.error("خطأ تليجرام في المرفق:", fileData);
-                    throw new Error("فشل إرسال الصورة: " + fileData.description);
+                    throw new Error("فشل إرسال المرفق: " + fileData.description);
                 }
             }
         }
     }
-
-    // ==========================================
-    // وظائف التبويب الأول (طلب جديد)
-    // ==========================================
     
     function updatePrices() {
         const type = document.getElementById('accountType').value;
@@ -557,11 +545,6 @@
             btn.disabled = false;
         }
     }
-
-
-    // ==========================================
-    // وظائف التبويب الثاني (تأكيد الطلب الحالي)
-    // ==========================================
     
     function searchInvoice() {
         const code = document.getElementById('searchInvCode').value.trim();
